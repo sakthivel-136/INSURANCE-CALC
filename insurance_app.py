@@ -7,16 +7,11 @@ Original file is located at
     https://colab.research.google.com/drive/1S-lHfQWkuZ-Gj3M6C-Gz-qpFaD7HRdlV
 """
 
-
 import streamlit as st
 import numpy as np
 import pickle
-from streamlit_chat import message
 
-# ---------------------- PAGE CONFIG (Must be at the very top) ----------------------
-st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
-
-# ---------------------- LOAD MODEL ----------------------
+# -------------------- Load Model --------------------
 @st.cache_resource
 def load_model():
     with open('insurance_model.pkl', 'rb') as f:
@@ -24,7 +19,10 @@ def load_model():
 
 model = load_model()
 
-# ---------------------- HEADER & MOVING BANNER ----------------------
+# -------------------- Page Config (Must Be First) --------------------
+st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
+
+# -------------------- Header & Animated Banner --------------------
 st.markdown("""
     <style>
         .banner {
@@ -34,7 +32,6 @@ st.markdown("""
             border-radius: 10px;
             text-align: center;
             animation: moveBanner 15s linear infinite;
-            font-size: 16px;
         }
         @keyframes moveBanner {
             0% {transform: translateX(-100%);}
@@ -42,10 +39,9 @@ st.markdown("""
             100% {transform: translateX(100%);}
         }
         .title {
-            font-size: 40px;
+            font-size: 48px;
             color: #4B8BBE;
             text-align: center;
-            font-weight: bold;
         }
         .subtitle {
             font-size: 18px;
@@ -54,82 +50,95 @@ st.markdown("""
         }
     </style>
     <div class="title">💰 Insurance Charges Estimator</div>
-    <div class="subtitle">Predict medical expenses using smart ML technology</div>
+    <div class="subtitle">Accurate predictions using AI - Powered by Linear Regression</div>
     <br>
-    <div class="banner">📢 Estimate Charges Instantly | Built with ❤️ by konjam_kadhalxx | Streamlit Pro UI 🌟</div>
+    <div class="banner">🏥 Predict Medical Charges Instantly | Developed by konjam_kadhalxx | Streamlit Pro UI 🌟</div>
 """, unsafe_allow_html=True)
 
-# ---------------------- FORM ----------------------
+# -------------------- Input Form --------------------
 with st.form("prediction_form", clear_on_submit=False):
-    st.subheader("🧾 Enter Your Information")
+    st.subheader("🧾 Enter Personal Information")
 
     col1, col2 = st.columns(2)
 
     with col1:
         age = st.slider("🎂 Age", 18, 100, 30)
-        bmi = st.number_input("⚖️ BMI (Body Mass Index)", 10.0, 50.0, value=25.0)
-        children = st.number_input("👶 Children", 0, 10, step=1)
+        bmi = st.number_input("⚖️ BMI", min_value=10.0, max_value=50.0, value=25.0)
+        children = st.number_input("👶 Number of Children", min_value=0, max_value=10, step=1)
 
     with col2:
         sex = st.radio("🧑 Sex", ['Male', 'Female'], horizontal=True)
         smoker = st.radio("🚬 Smoker", ['Yes', 'No'], horizontal=True)
 
-    # Convert to model-expected format
     sex = 1 if sex == "Male" else 0
     smoker = 1 if smoker == "Yes" else 0
 
-    submitted = st.form_submit_button("🔍 Estimate Charges")
-    if submitted:
-        input_data = np.array([[age, sex, bmi, children, smoker]])
-        result = model.predict(input_data)[0]
-        st.success(f"💸 Estimated Charges: **${result:,.2f}**")
+    submit = st.form_submit_button("🔍 Estimate Charges")
 
-# ---------------------- CHATBOT ----------------------
+# -------------------- Prediction and Animation --------------------
+if submit:
+    data = np.array([[age, sex, bmi, children, smoker]])
+    prediction = model.predict(data)[0]
+
+    # Animation effect
+    st.markdown("""
+        <style>
+        .runner {
+            font-size: 36px;
+            animation: run 2.5s linear forwards;
+        }
+        @keyframes run {
+            0%   { margin-left: 0%; opacity: 0; }
+            20%  { opacity: 1; }
+            100% { margin-left: 90%; opacity: 0; }
+        }
+        </style>
+        <div class='runner'>🏃‍♂️</div>
+    """, unsafe_allow_html=True)
+
+    st.success(f"💵 Estimated Charges: **${prediction:,.2f}**")
+
+# -------------------- Chatbot Section --------------------
 st.markdown("---")
 st.subheader("💬 Insurance ChatBot Assistant")
 
-# Sample static Q&A
-default_qa = {
+qa_bank = {
     "What factors affect insurance charges?": "Age, sex, BMI, number of children, and smoking status.",
-    "Why is smoking expensive in insurance?": "Because it significantly increases health risks.",
-    "Does BMI really matter?": "Yes, higher BMI increases risk, so insurance cost goes up.",
-    "Can I reduce my charges?": "Yes, through healthy habits and quitting smoking.",
-    "Is this prediction 100% accurate?": "It’s an estimate based on real-world data and trends."
+    "Is smoking really that bad for insurance?": "Yes, smokers often pay more than double in premiums.",
+    "Does having children affect cost?": "Yes, more dependents can increase costs.",
+    "Is this prediction 100% accurate?": "It's a close estimate based on real-world data.",
 }
 
-# Session state to store chat
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+if "chat" not in st.session_state:
+    st.session_state.chat = []
 
-user_input = st.text_input("Ask a question (e.g. Why is my insurance high?)", key="chat_input")
-if user_input:
-    answer = default_qa.get(user_input.strip(), "❓ Sorry, I don't have that info. Try another question.")
-    st.session_state.chat_history.append((user_input, answer))
+user_q = st.text_input("Ask your question here...", placeholder="e.g., Does BMI affect insurance cost?")
+if user_q:
+    reply = qa_bank.get(user_q.strip(), "Sorry, I don't have that info yet.")
+    st.session_state.chat.append((user_q, reply))
 
-# Display messages with unique keys
-for i, (q, a) in enumerate(st.session_state.chat_history):
-    message(q, is_user=True, key=f"user_{i}")
-    message(a, key=f"bot_{i}")
+for i, (q, a) in enumerate(st.session_state.chat):
+    st.markdown(f"**🧑‍💼 You:** {q}")
+    st.markdown(f"**🤖 Bot:** {a}")
 
-# ---------------------- FAQ ----------------------
+# -------------------- FAQ Section --------------------
 st.markdown("---")
 with st.expander("📚 Frequently Asked Questions"):
     st.markdown("""
-**Q1:** _Why is my estimate high?_  
-→ Likely due to BMI or smoking status.
+    **Q1:** _Why is my estimate high?_  
+    → Likely due to high BMI or being a smoker.
 
-**Q2:** _Can I reduce charges?_  
-→ Healthy habits and quitting smoking can significantly help.
+    **Q2:** _Can I reduce charges?_  
+    → Yes, by maintaining a healthy lifestyle and quitting smoking.
 
-**Q3:** _Is my data stored?_  
-→ No. This is a private, local prediction tool.
-""")
+    **Q3:** _Is my data stored?_  
+    → No, your data is never stored. This is a demo tool.
+    """)
 
-# ---------------------- FOOTER ----------------------
+# -------------------- Footer --------------------
 st.markdown("""
     <hr>
     <div style='text-align: center; color: grey; font-size: 13px;'>
-        Created with ❤️ by <strong>konjam_kadhalxx</strong> | Powered by Streamlit & Machine Learning
+        Created with ❤️ by <strong>konjam_kadhalxx</strong> | Using Streamlit, Python & Machine Learning
     </div>
 """, unsafe_allow_html=True)
-

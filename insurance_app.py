@@ -67,7 +67,7 @@ with st.form("prediction_form", clear_on_submit=False):
 
     with col1:
         age = st.slider("🎂 Age", 18, 100, 30)
-        bmi = st.number_input("⚖️ BMI (Body Mass Index)", 10.0, 50.0, value=25.0, step=1)
+        bmi = st.number_input("⚖️ BMI (Body Mass Index)", 10.0, 50.0, value=25.0)
         children = st.number_input("👶 Children", 0, 10, step=1)
 
     with col2:

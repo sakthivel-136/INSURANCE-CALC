@@ -8,24 +8,29 @@ Original file is located at
 """
 
 
-
 import streamlit as st
 import numpy as np
 import pickle
-from streamlit_chat import message
 
-# Load the model
+# ✅ MUST BE FIRST Streamlit command
+st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
+
+# Optional: Chat support (install via `pip install streamlit-chat`)
+try:
+    from streamlit_chat import message
+    has_chat = True
+except ImportError:
+    has_chat = False
+
+# ---------------------- LOAD MODEL ----------------------
 @st.cache_resource
 def load_model():
-    with open('insurance_model.pkl', 'rb') as f:
+    with open("insurance_model.pkl", "rb") as f:
         return pickle.load(f)
 
 model = load_model()
 
-# ---------------------- PAGE CONFIG ----------------------
-st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
-
-# ---------------------- HEADER & BANNER ----------------------
+# ---------------------- HEADER & ANIMATED BANNER ----------------------
 st.markdown("""
     <style>
         .banner {
@@ -34,28 +39,30 @@ st.markdown("""
             padding: 10px;
             border-radius: 10px;
             text-align: center;
-            animation: moveBanner 15s linear infinite;
+            animation: scroll 15s linear infinite;
+            white-space: nowrap;
+            overflow: hidden;
         }
-        @keyframes moveBanner {
-            0% {transform: translateX(-100%);}
-            50% {transform: translateX(0);}
-            100% {transform: translateX(100%);}
+        @keyframes scroll {
+            0% {transform: translateX(100%);}
+            100% {transform: translateX(-100%);}
         }
         .title {
-            font-size: 48px;
+            font-size: 40px;
             color: #4B8BBE;
             text-align: center;
+            font-weight: bold;
         }
         .subtitle {
-            font-size: 18px;
+            font-size: 16px;
             color: #666;
             text-align: center;
         }
     </style>
     <div class="title">💰 Insurance Charges Estimator</div>
-    <div class="subtitle">Accurate predictions using AI - Powered by Linear Regression</div>
+    <div class="subtitle">Accurate AI predictions powered by Linear Regression</div>
     <br>
-    <div class="banner">🏥 Predict Medical Charges Instantly | Developed by konjam_kadhalxx | Streamlit Pro UI 🌟</div>
+    <div class="banner">🏥 Predict Insurance Costs | Built by konjam_kadhalxx | Streamlit Pro UI 🌟</div>
 """, unsafe_allow_html=True)
 
 # ---------------------- FORM ----------------------
@@ -73,57 +80,61 @@ with st.form("prediction_form", clear_on_submit=False):
         sex = st.radio("🧑 Sex", ['Male', 'Female'], horizontal=True)
         smoker = st.radio("🚬 Smoker", ['Yes', 'No'], horizontal=True)
 
-    sex = 1 if sex == "Male" else 0
-    smoker = 1 if smoker == "Yes" else 0
+    sex_encoded = 1 if sex == "Male" else 0
+    smoker_encoded = 1 if smoker == "Yes" else 0
 
     submitted = st.form_submit_button("🔍 Estimate Charges")
 
     if submitted:
-        input_data = np.array([[age, sex, bmi, children, smoker]])
+        input_data = np.array([[age, sex_encoded, bmi, children, smoker_encoded]])
         result = model.predict(input_data)[0]
         st.success(f"💸 Estimated Charges: **${result:,.2f}**")
 
 # ---------------------- CHATBOT SECTION ----------------------
 st.markdown("---")
-st.subheader("💬 Insurance ChatBot Assistant")
+st.subheader("💬 Insurance Assistant")
 
 default_qa = {
-    "What factors affect insurance charges?": "Age, sex, BMI, number of children, and whether you're a smoker.",
-    "Is smoking really that bad for insurance?": "Yes, smokers often pay more than double in premiums.",
-    "Does having children affect cost?": "Yes, slightly. More dependents can increase costs.",
-    "Is this prediction 100% accurate?": "No model is perfect, but ours is based on real-world data and provides a close estimate."
+    "What factors affect insurance charges?": "Age, sex, BMI, number of children, and smoking status.",
+    "Is smoking bad for insurance?": "Yes, smoking can more than double your premium.",
+    "Does BMI matter?": "Yes, a higher BMI is often linked to higher insurance costs.",
+    "Can I reduce my insurance charges?": "Maintaining a healthy lifestyle and quitting smoking can help reduce costs."
 }
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-user_input = st.text_input("Ask your question here...", placeholder="e.g., Does BMI affect insurance cost?")
+user_input = st.text_input("Ask anything about insurance charges...", placeholder="e.g., Does BMI affect insurance?")
 if user_input:
-    answer = default_qa.get(user_input.strip(), "Sorry, I don't have that info. Try asking something else.")
+    answer = default_qa.get(user_input.strip(), "🤖 Sorry, I don't have that info. Try another question.")
     st.session_state.chat_history.append((user_input, answer))
 
 for q, a in st.session_state.chat_history:
-    message(q, is_user=True)
-    message(a)
+    if has_chat:
+        message(q, is_user=True)
+        message(a)
+    else:
+        st.write(f"🧑 You: {q}")
+        st.write(f"🤖 Bot: {a}")
 
 # ---------------------- FAQ SECTION ----------------------
 st.markdown("---")
 with st.expander("📚 Frequently Asked Questions"):
     st.markdown("""
-    **Q1:** _Why is my estimate high?_
-    → Likely due to BMI or smoking status.
+    **Q1:** _Why is my estimate high?_  
+    → Likely due to high BMI or being a smoker.
 
-    **Q2:** _Can I reduce charges?_
-    → Healthy habits and quitting smoking can significantly help.
+    **Q2:** _Can I lower my cost?_  
+    → Yes, quit smoking and keep BMI in a healthy range.
 
-    **Q3:** _Is my data stored?_
-    → No, this is a stateless demo for prediction only.
+    **Q3:** _Is this app storing my info?_  
+    → No, this app is stateless and for demo purposes only.
     """)
 
 # ---------------------- FOOTER ----------------------
 st.markdown("""
     <hr>
     <div style='text-align: center; color: grey; font-size: 13px;'>
-        Created with ❤️ by <strong>konjam_kadhalxx</strong> | Using Streamlit, Python & Machine Learning
+        Created with ❤️ by <strong>konjam_kadhalxx</strong> | Streamlit, Python, and AI
     </div>
 """, unsafe_allow_html=True)

@@ -95,8 +95,8 @@ if submit:
         </style>
         <div class='runner'>🏃‍♂️</div>
     """, unsafe_allow_html=True)
-
-    st.success(f"💵 Estimated Charges: **${prediction:,.2f}**")
+monthly = prediction / 12
+st.success(f"💵 Estimated **Monthly** Charges: **${monthly:,.2f}**")
 
 # -------------------- Chatbot Section --------------------
 st.markdown("---")
@@ -107,6 +107,10 @@ qa_bank = {
     "Is smoking really that bad for insurance?": "Yes, smokers often pay more than double in premiums.",
     "Does having children affect cost?": "Yes, more dependents can increase costs.",
     "Is this prediction 100% accurate?": "It's a close estimate based on real-world data.",
+    "Why is my estimate high?":"Likely due to high BMI or being a smoker.",
+    " Can I reduce charges?":"Yes, by maintaining a healthy lifestyle and quitting smoking.",
+    "Is my data stored?":"No, your data is never stored. This is a demo tool.",
+    " Why is my insurance estimate so high?":"It could be due to factors like smoking, high BMI, older age, or having multiple children covered."
 }
 
 if "chat" not in st.session_state:

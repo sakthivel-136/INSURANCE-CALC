@@ -14,6 +14,9 @@ import streamlit as st
 import numpy as np
 import pickle
 
+# ✅ Set page configuration first (must be the FIRST Streamlit command)
+st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
+
 # -------------------- Load Model --------------------
 @st.cache_resource
 def load_model():
@@ -21,9 +24,6 @@ def load_model():
         return pickle.load(f)
 
 model = load_model()
-
-# -------------------- Page Config (Must Be First) --------------------
-st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
 
 # -------------------- Header & Animated Banner --------------------
 st.markdown("""
@@ -154,4 +154,3 @@ st.markdown("""
         Created with ❤️ by <strong>konjam_kadhalxx</strong> | Using Streamlit, Python & Machine Learning
     </div>
 """, unsafe_allow_html=True)
-

@@ -7,16 +7,16 @@ Original file is located at
     https://colab.research.google.com/drive/1S-lHfQWkuZ-Gj3M6C-Gz-qpFaD7HRdlV
 """
 
-
 # -*- coding: utf-8 -*-
 """INSURANCE_APP"""
 
 import streamlit as st
+
+# ✅ MUST BE THE FIRST STREAMLIT COMMAND
+st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
+
 import numpy as np
 import pickle
-
-# ✅ Must be the FIRST Streamlit command
-st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
 
 # -------------------- Load Model --------------------
 @st.cache_resource

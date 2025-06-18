@@ -7,15 +7,9 @@ Original file is located at
     https://colab.research.google.com/drive/1S-lHfQWkuZ-Gj3M6C-Gz-qpFaD7HRdlV
 """
 
-# -*- coding: utf-8 -*-
-"""INSURANCE_APP"""
-
 import streamlit as st
 import numpy as np
 import pickle
-
-# ✅ Set page configuration first (must be the FIRST Streamlit command)
-st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
 
 # -------------------- Load Model --------------------
 @st.cache_resource
@@ -24,6 +18,9 @@ def load_model():
         return pickle.load(f)
 
 model = load_model()
+
+# -------------------- Page Config --------------------
+st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
 
 # -------------------- Header & Animated Banner --------------------
 st.markdown("""
@@ -50,11 +47,11 @@ st.markdown("""
             font-size: 18px;
             color: #666;
             text-align: center;
+            margin-bottom: 10px;
         }
     </style>
     <div class="title">💰 Insurance Charges Estimator</div>
     <div class="subtitle">Accurate predictions using AI - Powered by Linear Regression</div>
-    <br>
     <div class="banner">🏥 Predict Medical Charges Instantly | Developed by konjam_kadhalxx | Streamlit Pro UI 🌟</div>
 """, unsafe_allow_html=True)
 
@@ -73,17 +70,16 @@ with st.form("prediction_form", clear_on_submit=False):
         sex = st.radio("🧑 Sex", ['Male', 'Female'], horizontal=True)
         smoker = st.radio("🚬 Smoker", ['Yes', 'No'], horizontal=True)
 
-    sex = 1 if sex == "Male" else 0
-    smoker = 1 if smoker == "Yes" else 0
+    sex_encoded = 1 if sex == "Male" else 0
+    smoker_encoded = 1 if smoker == "Yes" else 0
 
     submit = st.form_submit_button("🔍 Estimate Charges")
 
 # -------------------- Prediction and Animation --------------------
 if submit:
-    data = np.array([[age, sex, bmi, children, smoker]])
+    data = np.array([[age, sex_encoded, bmi, children, smoker_encoded]])
     prediction = model.predict(data)[0]
 
-    # Animation effect
     st.markdown("""
         <style>
         .runner {
@@ -99,13 +95,7 @@ if submit:
         <div class='runner'>🏃‍♂️</div>
     """, unsafe_allow_html=True)
 
-    # Toggle for monthly or yearly view
-    view = st.radio("🔄 View charges as:", ["Annual", "Monthly"], horizontal=True)
-
-    if view == "Annual":
-        st.success(f"💵 Estimated **Annual** Charges: **${prediction:,.2f}**")
-    else:
-        st.success(f"📆 Estimated **Monthly** Charges: **${prediction/12:,.2f}**")
+    st.success(f"💵 Estimated Charges: **${prediction:,.2f}**")
 
 # -------------------- Chatbot Section --------------------
 st.markdown("---")
@@ -116,9 +106,9 @@ qa_bank = {
     "Is smoking really that bad for insurance?": "Yes, smokers often pay more than double in premiums.",
     "Does having children affect cost?": "Yes, more dependents can increase costs.",
     "Is this prediction 100% accurate?": "It's a close estimate based on real-world data.",
-    "Why is my estimate high?":"Likely due to high BMI or being a smoker.",
-    " Can I reduce charges?":"Yes, by maintaining a healthy lifestyle and quitting smoking.",
-    "Is my data stored?":"No, your data is never stored. This is a demo tool."
+    "Why is my estimate high?": "Likely due to high BMI or being a smoker.",
+    "Can I reduce charges?": "Yes, by maintaining a healthy lifestyle and quitting smoking.",
+    "Is my data stored?": "No, your data is never stored. This is a demo tool."
 }
 
 if "chat" not in st.session_state:
@@ -126,10 +116,10 @@ if "chat" not in st.session_state:
 
 user_q = st.text_input("Ask your question here...", placeholder="e.g., Does BMI affect insurance cost?")
 if user_q:
-    reply = qa_bank.get(user_q.strip(), "Sorry, I don't have that info yet.")
+    reply = qa_bank.get(user_q.strip(), "🤖 Sorry, I don't have that info yet.")
     st.session_state.chat.append((user_q, reply))
 
-for i, (q, a) in enumerate(st.session_state.chat):
+for q, a in st.session_state.chat:
     st.markdown(f"**🧑‍💼 You:** {q}")
     st.markdown(f"**🤖 Bot:** {a}")
 

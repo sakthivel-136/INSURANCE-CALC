@@ -16,9 +16,15 @@ Original file is located at:
 https://colab.research.google.com/drive/1S-lHfQWkuZ-Gj3M6C-Gz-qpFaD7HRdlV
 """
 
+# -*- coding: utf-8 -*-
+"""INSURANCE_APP"""
+
 import streamlit as st
 import numpy as np
 import pickle
+
+# ✅ Must be the FIRST Streamlit command
+st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
 
 # -------------------- Load Model --------------------
 @st.cache_resource
@@ -27,9 +33,6 @@ def load_model():
         return pickle.load(f)
 
 model = load_model()
-
-# -------------------- Page Config (Must Be First) --------------------
-st.set_page_config(page_title="💼 Insurance Predictor", layout="centered", page_icon="💰")
 
 # -------------------- Header & Animated Banner --------------------
 st.markdown("""
@@ -105,7 +108,6 @@ if submit:
         <div class='runner'>🏃‍♂️</div>
     """, unsafe_allow_html=True)
 
-    # ✅ Monthly Charges Calculation
     monthly = prediction / 12
     st.success(f"💵 Estimated **Monthly** Charges: **${monthly:,.2f}**")
 
@@ -157,4 +159,3 @@ st.markdown("""
         Created with ❤️ by <strong>konjam_kadhalxx</strong> | Using Streamlit, Python & Machine Learning
     </div>
 """, unsafe_allow_html=True)
-
